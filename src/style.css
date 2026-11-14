@@ -1,0 +1,80 @@
+:root {
+  --bg: #031b33;
+  --bg-2: #062645;
+  --card: rgba(10, 45, 80, 0.55);
+  --card-border: rgba(120, 190, 255, 0.16);
+  --text: #b7cbe0;
+  --text-h: #f2f9ff;
+  --muted: #7f9bb8;
+  --accent: #5cc8ff;
+  --accent-2: #9fe6ff;
+  --accent-ink: #021427;
+  --glow: 0 0 24px rgba(92, 200, 255, 0.45);
+  --radius: 18px;
+  --sans: 'Manrope', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: dark;
+  font: 17px/1.6 var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 72px;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--text-h);
+  line-height: 1.15;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
