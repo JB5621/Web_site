@@ -3,7 +3,8 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import logo from '../assets/logo.jpg'
 import { defaultContent, ICONS, TELEGRAM_RE, EMAIL_RE, PHONE_RE, URL_RE } from '../content.js'
 
-document.title = 'AS VPN — Admin panel'
+document.title = 'AS VPN — Админ-панель'
+document.documentElement.lang = 'ru'
 const robots = document.createElement('meta')
 robots.name = 'robots'
 robots.content = 'noindex, nofollow'
@@ -49,7 +50,7 @@ async function api(path, opts = {}) {
     token.value = ''
     store.set('')
   }
-  if (!r.ok) throw new Error(data?.error || `Ýalňyşlyk (${r.status})`)
+  if (!r.ok) throw new Error(data?.error || `Ошибка (${r.status})`)
   return data
 }
 
@@ -78,14 +79,14 @@ async function login() {
     loginForm.value.password = ''
     await loadAll()
   } catch (e) {
-    loginError.value = e.message === 'Failed to fetch' ? 'Serwer bilen baglanyşyk ýok' : e.message
+    loginError.value = e.message === 'Failed to fetch' ? 'Нет связи с сервером' : e.message
   } finally {
     loggingIn.value = false
   }
 }
 
 async function logout() {
-  if (dirty.value && !confirm('Ýatda saklanmadyk üýtgeşmeler ýitjek. Çykmalymy?')) return
+  if (dirty.value && !confirm('Несохранённые изменения будут потеряны. Выйти?')) return
   try {
     await api('/api/logout', { method: 'POST' })
   } catch {
@@ -121,7 +122,7 @@ async function loadAll() {
 async function refreshOrders(silent) {
   try {
     orders.value = await api('/api/orders')
-    if (!silent) notify('Sargytlar täzelendi')
+    if (!silent) notify('Заказы обновлены')
   } catch (e) {
     if (!silent) notify(e.message, 'err')
   }
@@ -131,19 +132,19 @@ const contactErrors = computed(() => {
   const e = {}
   if (!draft.value) return e
   const tg = draft.value.contact.telegram.trim().replace(/^@/, '')
-  if (!TELEGRAM_RE.test(tg)) e['contact.telegram'] = 'Diňe latyn harplary, sanlar we _ (3–32 simwol)'
-  if (!EMAIL_RE.test(draft.value.contact.email.trim())) e['contact.email'] = 'Gmail salgysy nädogry'
+  if (!TELEGRAM_RE.test(tg)) e['contact.telegram'] = 'Только латинские буквы, цифры и _ (3–32 символа)'
+  if (!EMAIL_RE.test(draft.value.contact.email.trim())) e['contact.email'] = 'Неверный адрес Gmail'
   const ct = draft.value.contact
-  if (ct.phone.trim() && !PHONE_RE.test(ct.phone.trim())) e['contact.phone'] = 'Telefon belgisi nädogry (mysal: +993 61 234567)'
-  if (ct.imo.trim() && !PHONE_RE.test(ct.imo.trim())) e['contact.imo'] = 'imo belgisi nädogry (mysal: +993 61 234567)'
-  if (ct.link.trim() && !URL_RE.test(ct.link.trim())) e['contact.link'] = 'Link https:// bilen başlamaly'
+  if (ct.phone.trim() && !PHONE_RE.test(ct.phone.trim())) e['contact.phone'] = 'Неверный номер телефона (пример: +993 61 234567)'
+  if (ct.imo.trim() && !PHONE_RE.test(ct.imo.trim())) e['contact.imo'] = 'Неверный номер imo (пример: +993 61 234567)'
+  if (ct.link.trim() && !URL_RE.test(ct.link.trim())) e['contact.link'] = 'Ссылка должна начинаться с https://'
   return e
 })
 
 async function save() {
   if (Object.keys(contactErrors.value).length) {
     page.value = 'contact'
-    notify('Habarlaşmak maglumatlaryny düzediň', 'err')
+    notify('Исправьте контактные данные', 'err')
     return
   }
   saving.value = true
@@ -151,7 +152,7 @@ async function save() {
     const content = await api('/api/content', { method: 'PUT', body: JSON.stringify(draft.value) })
     saved.value = structuredClone(content)
     draft.value = structuredClone(content)
-    notify('Ýatda saklandy — saýt täzelendi')
+    notify('Сохранено — сайт обновлён')
   } catch (e) {
     notify(e.message, 'err')
   } finally {
@@ -160,20 +161,20 @@ async function save() {
 }
 
 function discard() {
-  if (!confirm('Ähli ýatda saklanmadyk üýtgeşmeleri ýatyrmalymy?')) return
+  if (!confirm('Отменить все несохранённые изменения?')) return
   draft.value = structuredClone(saved.value)
 }
 
 function resetSection(key) {
   const where = key === 'contact' ? '' : ` (${LANG_NAMES[editLang.value]})`
-  if (!confirm(`Bu bölümi${where} başlangyç ýagdaýyna gaýtarmalymy? (Ýatda saklamasaňyz saýta täsir etmez)`)) return
+  if (!confirm(`Вернуть этот раздел${where} к исходному состоянию? (Пока не сохраните, сайт не изменится)`)) return
   if (key === 'contact') draft.value.contact = structuredClone(defaultContent.contact)
   else draft.value[editLang.value][key] = structuredClone(defaultContent[editLang.value][key])
 }
 
 // ---------- dil ----------
-// Ýazgylar her dil üçin aýratyn; habarlaşmak we tarifleriň bahasy/GB umumy.
-const LANG_NAMES = { tk: 'Türkmençe', ru: 'Rusça' }
+// Тексты отдельно для каждого языка; контакты и цена/GB тарифов общие.
+const LANG_NAMES = { tk: 'Туркменский', ru: 'Русский' }
 const editLang = ref('tk')
 const isShared = (path) => path.startsWith('contact') || path.startsWith('planItems')
 const fp = (path) => (isShared(path) ? path : `${editLang.value}.${path}`)
@@ -189,23 +190,23 @@ const setAt = (obj, path, val) => {
 
 // ---------- navigation ----------
 const pages = [
-  { id: 'dashboard', label: 'Umumy syn', icon: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z' },
-  { id: 'orders', label: 'Sargytlar', icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' },
-  { id: 'plans', label: 'Tarifler', icon: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8zM7 7h.01' },
-  { id: 'contact', label: 'Habarlaşmak', icon: 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6' },
-  { id: 'hero', label: 'Baş bölüm', icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10' },
-  { id: 'features', label: 'Artykmaçlyklar', icon: ICONS.star.d },
-  { id: 'steps', label: 'Ädimler', icon: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01' },
-  { id: 'faq', label: 'Soraglar', icon: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01' },
-  { id: 'other', label: 'CTA we footer', icon: 'M4 6h16M4 12h16M4 18h10' },
+  { id: 'dashboard', label: 'Обзор', icon: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z' },
+  { id: 'orders', label: 'Заказы', icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0' },
+  { id: 'plans', label: 'Тарифы', icon: 'M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8zM7 7h.01' },
+  { id: 'contact', label: 'Контакты', icon: 'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6' },
+  { id: 'hero', label: 'Главный блок', icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 22V12h6v10' },
+  { id: 'features', label: 'Преимущества', icon: ICONS.star.d },
+  { id: 'steps', label: 'Шаги', icon: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01' },
+  { id: 'faq', label: 'Вопросы', icon: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01' },
+  { id: 'other', label: 'CTA и футер', icon: 'M4 6h16M4 12h16M4 18h10' },
 ]
 const page = ref('dashboard')
 const pageTitle = computed(() => pages.find((p) => p.id === page.value)?.label)
 
 const head = (key) => [
-  { path: `${key}.eyebrow`, label: 'Kiçi ýazgy (üstünde)' },
-  { path: `${key}.title`, label: 'Sözbaşy' },
-  { path: `${key}.subtitle`, label: 'Düşündiriş' },
+  { path: `${key}.eyebrow`, label: 'Надзаголовок' },
+  { path: `${key}.title`, label: 'Заголовок' },
+  { path: `${key}.subtitle`, label: 'Описание' },
 ]
 
 const editors = {
@@ -213,21 +214,21 @@ const editors = {
     reset: 'contact',
     groups: [
       {
-        title: 'Habarlaşmak maglumatlary',
-        desc: '"Satyn al" düwmesi ilki Telegramy açýar, Telegram ýok bolsa Gmail açylýar.',
+        title: 'Контактные данные',
+        desc: 'Кнопка «Купить» сначала открывает Telegram, а если Telegram не указан — Gmail.',
         fields: [
-          { path: 'contact.telegram', label: 'Telegram ulanyjy ady', prefix: '@', hint: '@ belgisiz, mysal: qqq_sergo' },
+          { path: 'contact.telegram', label: 'Имя пользователя Telegram', prefix: '@', hint: 'Без @, пример: asvpntm' },
           { path: 'contact.email', label: 'Gmail', type: 'email' },
         ],
       },
       {
-        title: 'Goşmaça habarlaşmak',
-        desc: 'Doldurylan meýdançalar saýtyň "Habarlaşmak" bölüminde we aşaky bölüminde peýda bolýar. Boş goýsaňyz görkezilmeýär.',
+        title: 'Дополнительные контакты',
+        desc: 'Заполненные поля появляются в разделе «Контакты» и в подвале сайта. Пустые поля не показываются.',
         fields: [
-          { path: 'contact.phone', label: 'Telefon belgisi', type: 'tel', hint: 'Mysal: +993 61 234567' },
-          { path: 'contact.imo', label: 'imo belgisi', type: 'tel', hint: 'Basylanda belgi göçürilýär' },
-          { path: 'contact.link', label: 'Link', type: 'url', hint: 'Mysal: https://instagram.com/asvpn' },
-          { path: 'contact.linkLabel', label: 'Linkiň ady', hint: 'Mysal: Instagram. Boş bolsa "Biziň sahypamyz"' },
+          { path: 'contact.phone', label: 'Номер телефона', type: 'tel', hint: 'Пример: +993 61 234567' },
+          { path: 'contact.imo', label: 'Номер imo', type: 'tel', hint: 'При нажатии номер копируется' },
+          { path: 'contact.link', label: 'Ссылка', type: 'url', hint: 'Пример: https://instagram.com/asvpn' },
+          { path: 'contact.linkLabel', label: 'Название ссылки', hint: 'Пример: Instagram. Если пусто — «Наша страница»' },
         ],
       },
     ],
@@ -236,104 +237,104 @@ const editors = {
     reset: 'hero',
     groups: [
       {
-        title: 'Baş bölüm',
+        title: 'Главный блок',
         fields: [
-          { path: 'hero.badge', label: 'Ýaşyl belgi ýazgysy' },
-          { path: 'hero.title1', label: 'Sözbaşy (1-nji bölegi)' },
-          { path: 'hero.highlight', label: 'Sözbaşy (ýalpyldawuk söz)' },
-          { path: 'hero.title2', label: 'Sözbaşy (2-nji setir)' },
-          { path: 'hero.lead', label: 'Düşündiriş ýazgy', type: 'textarea' },
-          { path: 'hero.ctaPrimary', label: 'Esasy düwme' },
-          { path: 'hero.ctaSecondary', label: 'Ikinji düwme' },
-          { path: 'hero.chip1', label: 'Logo ýanyndaky ýazgy 1' },
-          { path: 'hero.chip2', label: 'Logo ýanyndaky ýazgy 2' },
+          { path: 'hero.badge', label: 'Текст зелёного бейджа' },
+          { path: 'hero.title1', label: 'Заголовок (1-я часть)' },
+          { path: 'hero.highlight', label: 'Заголовок (выделенное слово)' },
+          { path: 'hero.title2', label: 'Заголовок (2-я строка)' },
+          { path: 'hero.lead', label: 'Текст описания', type: 'textarea' },
+          { path: 'hero.ctaPrimary', label: 'Основная кнопка' },
+          { path: 'hero.ctaSecondary', label: 'Вторая кнопка' },
+          { path: 'hero.chip1', label: 'Подпись у логотипа 1' },
+          { path: 'hero.chip2', label: 'Подпись у логотипа 2' },
         ],
       },
     ],
-    strings: [{ path: 'marquee', title: 'Hereketli zolak', placeholder: 'Mysal: Android' }],
+    strings: [{ path: 'marquee', title: 'Бегущая строка', placeholder: 'Пример: Android' }],
   },
   features: {
     reset: 'features',
-    groups: [{ title: 'Bölümiň sözbaşysy', fields: head('features') }],
+    groups: [{ title: 'Заголовок раздела', fields: head('features') }],
     list: {
       path: 'features.items',
-      title: 'Artykmaçlyklar',
-      item: 'Artykmaçlyk',
+      title: 'Преимущества',
+      item: 'Преимущество',
       fields: [
-        { key: 'icon', label: 'Nyşan', type: 'icon' },
-        { key: 'title', label: 'Ady' },
-        { key: 'text', label: 'Düşündiriş', type: 'textarea', wide: true },
+        { key: 'icon', label: 'Иконка', type: 'icon' },
+        { key: 'title', label: 'Название' },
+        { key: 'text', label: 'Описание', type: 'textarea', wide: true },
       ],
-      blank: { icon: 'bolt', title: 'Täze artykmaçlyk', text: '' },
+      blank: { icon: 'bolt', title: 'Новое преимущество', text: '' },
     },
   },
   plans: {
     reset: 'plans',
     groups: [
-      { title: 'Bölümiň sözbaşysy', fields: head('plans') },
+      { title: 'Заголовок раздела', fields: head('plans') },
       {
-        title: 'Tarif kartlary',
+        title: 'Карточки тарифов',
         fields: [
-          { path: 'plans.badge', label: '"Iň amatly" belgisi' },
-          { path: 'plans.button', label: 'Düwmäniň ýazgysy' },
-          { path: 'plans.currency', label: 'Pul birligi' },
-          { path: 'plans.message', label: 'Telegram/Gmail habarynyň başy', type: 'textarea', hint: 'Soňuna saýlanan tarif awtomatik goşulýar' },
+          { path: 'plans.badge', label: 'Бейдж «Самый выгодный»' },
+          { path: 'plans.button', label: 'Текст кнопки' },
+          { path: 'plans.currency', label: 'Валюта' },
+          { path: 'plans.message', label: 'Начало сообщения в Telegram/Gmail', type: 'textarea', hint: 'Выбранный тариф добавляется в конец автоматически' },
         ],
       },
     ],
     list: {
       path: 'planItems',
-      title: 'Tarifler',
-      desc: 'Baha, GB we ulanyjy sany iki dil üçin umumy — bir gezek üýtgetseňiz, iki dilde-de üýtgeýär.',
-      item: 'Tarif',
+      title: 'Тарифы',
+      desc: 'Цена, GB и число пользователей общие для обоих языков — изменив один раз, вы меняете их в обоих.',
+      item: 'Тариф',
       fields: [
-        { key: 'users', label: 'Ulanyjy sany', hint: 'Mysal: 1–2 ýa-da 3' },
-        { key: 'price', label: 'Bahasy', type: 'number', suffix: 'TMT' },
-        { key: 'gb', label: 'Trafik limiti', type: 'number', suffix: 'GB' },
-        { key: 'best', label: '"Iň amatly" diýip belle', type: 'check', exclusive: true },
+        { key: 'users', label: 'Число пользователей', hint: 'Пример: 1–2 или 3' },
+        { key: 'price', label: 'Цена', type: 'number', suffix: 'TMT' },
+        { key: 'gb', label: 'Лимит трафика', type: 'number', suffix: 'GB' },
+        { key: 'best', label: 'Отметить как «Самый выгодный»', type: 'check', exclusive: true },
       ],
       blank: { users: '1', price: 0, gb: 0, best: false },
     },
-    strings: [{ path: 'plans.extras', title: 'Her tarifde görkezilýän goşmaça setirler', placeholder: 'Mysal: 24/7 goldaw' }],
+    strings: [{ path: 'plans.extras', title: 'Дополнительные строки в каждом тарифе', placeholder: 'Пример: поддержка 24/7' }],
   },
   steps: {
     reset: 'steps',
-    groups: [{ title: 'Bölümiň sözbaşysy', fields: head('steps') }],
+    groups: [{ title: 'Заголовок раздела', fields: head('steps') }],
     list: {
       path: 'steps.items',
-      title: 'Ädimler',
-      item: 'Ädim',
+      title: 'Шаги',
+      item: 'Шаг',
       fields: [
-        { key: 'title', label: 'Ady' },
-        { key: 'text', label: 'Düşündiriş', type: 'textarea', wide: true },
+        { key: 'title', label: 'Название' },
+        { key: 'text', label: 'Описание', type: 'textarea', wide: true },
       ],
-      blank: { title: 'Täze ädim', text: '' },
+      blank: { title: 'Новый шаг', text: '' },
     },
   },
   faq: {
     reset: 'faq',
-    groups: [{ title: 'Bölümiň sözbaşysy', fields: head('faq').slice(0, 2) }],
+    groups: [{ title: 'Заголовок раздела', fields: head('faq').slice(0, 2) }],
     list: {
       path: 'faq.items',
-      title: 'Soraglar',
-      item: 'Sorag',
+      title: 'Вопросы',
+      item: 'Вопрос',
       fields: [
-        { key: 'q', label: 'Sorag', wide: true },
-        { key: 'a', label: 'Jogap', type: 'textarea', wide: true },
+        { key: 'q', label: 'Вопрос', wide: true },
+        { key: 'a', label: 'Ответ', type: 'textarea', wide: true },
       ],
-      blank: { q: 'Täze sorag?', a: '' },
+      blank: { q: 'Новый вопрос?', a: '' },
     },
   },
   other: {
     groups: [
       {
-        title: 'Aşaky çagyryş bölümi',
+        title: 'Нижний призыв к действию',
         fields: [
-          { path: 'cta.title', label: 'Sözbaşy' },
-          { path: 'cta.text', label: 'Ýazgy', type: 'textarea' },
+          { path: 'cta.title', label: 'Заголовок' },
+          { path: 'cta.text', label: 'Текст', type: 'textarea' },
         ],
       },
-      { title: 'Footer', fields: [{ path: 'footer.copyright', label: '© ýazgysy', hint: 'Öňünden ýyl awtomatik goşulýar' }] },
+      { title: 'Футер', fields: [{ path: 'footer.copyright', label: 'Текст ©', hint: 'Год добавляется в начало автоматически' }] },
     ],
   },
 }
@@ -343,7 +344,7 @@ const editor = computed(() => editors[page.value])
 const listOf = (path) => getAt(draft.value, fp(path))
 const addItem = (l) => listOf(l.path).push(structuredClone(l.blank))
 const removeItem = (l, i) => {
-  if (confirm(`${l.item} pozulsynmy?`)) listOf(l.path).splice(i, 1)
+  if (confirm(`Удалить: ${l.item.toLowerCase()}?`)) listOf(l.path).splice(i, 1)
 }
 const moveItem = (l, i, d) => {
   const arr = listOf(l.path)
@@ -361,10 +362,10 @@ const removeString = (s, i) => getAt(draft.value, fp(s.path)).splice(i, 1)
 
 // ---------- orders ----------
 const STATUS = {
-  new: { label: 'Täze', cls: 's-new' },
-  contacted: { label: 'Gürleşildi', cls: 's-contacted' },
-  paid: { label: 'Tölendi', cls: 's-paid' },
-  cancelled: { label: 'Ýatyryldy', cls: 's-cancelled' },
+  new: { label: 'Новый', cls: 's-new' },
+  contacted: { label: 'На связи', cls: 's-contacted' },
+  paid: { label: 'Оплачен', cls: 's-paid' },
+  cancelled: { label: 'Отменён', cls: 's-cancelled' },
 }
 const filter = ref('all')
 const query = ref('')
@@ -383,25 +384,25 @@ async function updateOrder(o, patch) {
   Object.assign(o, patch)
   try {
     await api(`/api/orders/${o.id}`, { method: 'PATCH', body: JSON.stringify(patch) })
-    notify('Sargyt täzelendi')
+    notify('Заказ обновлён')
   } catch (e) {
     Object.assign(o, prev)
     notify(e.message, 'err')
   }
 }
 async function deleteOrder(o) {
-  if (!confirm('Bu sargyt pozulsynmy?')) return
+  if (!confirm('Удалить этот заказ?')) return
   try {
     await api(`/api/orders/${o.id}`, { method: 'DELETE' })
     orders.value = orders.value.filter((x) => x.id !== o.id)
-    notify('Sargyt pozuldy')
+    notify('Заказ удалён')
   } catch (e) {
     notify(e.message, 'err')
   }
 }
 
 const cur = computed(() => draft.value?.tk.plans.currency || 'TMT')
-const planLabel = (p) => `${p.users} ulanyjy · ${p.gb} GB · ${p.price} ${cur.value}`
+const planLabel = (p) => `${p.users} польз. · ${p.gb} GB · ${p.price} ${cur.value}`
 const pad = (n) => String(n).padStart(2, '0')
 const fmtDate = (iso) => {
   const d = new Date(iso)
@@ -466,18 +467,18 @@ onBeforeUnmount(() => {
     <div class="login-glow" aria-hidden="true"></div>
     <form class="login card" @submit.prevent="login">
       <img :src="logo" alt="AS VPN" width="88" height="88" class="login-logo" />
-      <h1>Admin panel</h1>
-      <p class="muted">Dowam etmek üçin hasabyňyza giriň</p>
+      <h1>Админ-панель</h1>
+      <p class="muted">Войдите в аккаунт, чтобы продолжить</p>
 
       <label class="field">
-        <span>Ulanyjy ady</span>
+        <span>Имя пользователя</span>
         <input v-model.trim="loginForm.username" autocomplete="username" required autofocus />
       </label>
       <label class="field">
-        <span>Parol</span>
+        <span>Пароль</span>
         <div class="pass">
           <input v-model="loginForm.password" :type="showPass ? 'text' : 'password'" autocomplete="current-password" required />
-          <button type="button" class="pass-toggle" :aria-label="showPass ? 'Paroly gizle' : 'Paroly görkez'" @click="showPass = !showPass">
+          <button type="button" class="pass-toggle" :aria-label="showPass ? 'Скрыть пароль' : 'Показать пароль'" @click="showPass = !showPass">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path v-if="!showPass" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
               <path v-else d="M17.9 17.9A10 10 0 0 1 12 20c-7 0-11-8-11-8a18 18 0 0 1 5-5.9M9.9 4.2A9 9 0 0 1 12 4c7 0 11 8 11 8a18 18 0 0 1-2.2 3.2M1 1l22 22M14.1 14.1a3 3 0 1 1-4.2-4.2" />
@@ -488,9 +489,9 @@ onBeforeUnmount(() => {
       <p v-if="loginError" class="error" role="alert">{{ loginError }}</p>
       <button class="btn btn-primary btn-block" :disabled="loggingIn">
         <span v-if="loggingIn" class="spinner"></span>
-        {{ loggingIn ? 'Girilýär…' : 'Giriş' }}
+        {{ loggingIn ? 'Вход…' : 'Войти' }}
       </button>
-      <a href="/" class="back-link">← Saýta gaýt</a>
+      <a href="/" class="back-link">← Вернуться на сайт</a>
     </form>
   </div>
 
@@ -501,10 +502,10 @@ onBeforeUnmount(() => {
         <img :src="logo" alt="" width="36" height="36" />
         <div>
           <strong>AS VPN</strong>
-          <small>Admin panel</small>
+          <small>Админ-панель</small>
         </div>
       </div>
-      <nav class="side-nav" aria-label="Admin menýu">
+      <nav class="side-nav" aria-label="Меню админки">
         <button v-for="p in pages" :key="p.id" :class="{ active: page === p.id }" @click="page = p.id">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="p.icon" /></svg>
           {{ p.label }}
@@ -512,30 +513,30 @@ onBeforeUnmount(() => {
         </button>
       </nav>
       <div class="side-foot">
-        <a href="/" target="_blank" rel="noopener" class="btn btn-ghost btn-block">Saýty aç ↗</a>
-        <button class="btn btn-text btn-block" @click="logout">Çykmak</button>
+        <a href="/" target="_blank" rel="noopener" class="btn btn-ghost btn-block">Открыть сайт ↗</a>
+        <button class="btn btn-text btn-block" @click="logout">Выйти</button>
       </div>
     </aside>
     <div v-if="sideOpen" class="side-backdrop" @click="sideOpen = false"></div>
 
     <div class="main">
       <header class="topbar">
-        <button class="icon-btn menu-btn" aria-label="Menýu" @click="sideOpen = !sideOpen">
+        <button class="icon-btn menu-btn" aria-label="Меню" @click="sideOpen = !sideOpen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
         </button>
         <h1>{{ pageTitle }}</h1>
-        <div v-if="showLangSwitch" class="lang-switch" role="group" aria-label="Haýsy diliň ýazgylaryny üýtgetmeli">
+        <div v-if="showLangSwitch" class="lang-switch" role="group" aria-label="Язык редактируемых текстов">
           <button v-for="(n, l) in LANG_NAMES" :key="l" type="button" :class="{ on: editLang === l }"
             :aria-pressed="editLang === l" @click="editLang = l">{{ n }}</button>
         </div>
         <div class="topbar-actions">
           <template v-if="dirty">
-            <span class="dirty-dot">Ýatda saklanmadyk üýtgeşmeler</span>
-            <button class="btn btn-text" @click="discard">Ýatyr</button>
+            <span class="dirty-dot">Есть несохранённые изменения</span>
+            <button class="btn btn-text" @click="discard">Отменить</button>
           </template>
           <button class="btn btn-primary" :disabled="!dirty || saving" @click="save">
             <span v-if="saving" class="spinner"></span>
-            {{ saving ? 'Saklanýar…' : 'Ýatda sakla' }}
+            {{ saving ? 'Сохранение…' : 'Сохранить' }}
           </button>
         </div>
       </header>
@@ -549,31 +550,31 @@ onBeforeUnmount(() => {
         <template v-if="page === 'dashboard'">
           <div class="stats">
             <div class="card stat">
-              <span>Jemi sargyt</span>
+              <span>Всего заказов</span>
               <strong>{{ dash.total }}</strong>
-              <small>"Satyn al" basylan</small>
+              <small>Нажатий «Купить»</small>
             </div>
             <div class="card stat accent">
-              <span>Täze</span>
+              <span>Новые</span>
               <strong>{{ dash.fresh }}</strong>
-              <small>Jogap garaşýar</small>
+              <small>Ждут ответа</small>
             </div>
             <div class="card stat">
-              <span>Şu gün</span>
+              <span>Сегодня</span>
               <strong>{{ dash.today }}</strong>
-              <small>Täze gelen</small>
+              <small>Поступило</small>
             </div>
             <div class="card stat">
-              <span>Girdeji</span>
+              <span>Выручка</span>
               <strong>{{ dash.revenue }} <em>{{ cur }}</em></strong>
-              <small>{{ dash.paid }} sany tölenen</small>
+              <small>Оплачено: {{ dash.paid }}</small>
             </div>
           </div>
 
           <div class="grid-2">
             <section class="card panel">
-              <h2>Tarifler boýunça</h2>
-              <p v-if="!dash.planRows.length" class="empty">Heniz sargyt ýok</p>
+              <h2>По тарифам</h2>
+              <p v-if="!dash.planRows.length" class="empty">Заказов пока нет</p>
               <ul v-else class="bars">
                 <li v-for="r in dash.planRows" :key="r.label">
                   <div class="bar-head"><span>{{ r.label }}</span><b>{{ r.n }}</b></div>
@@ -587,10 +588,10 @@ onBeforeUnmount(() => {
             </section>
             <section class="card panel">
               <div class="panel-head">
-                <h2>Soňky sargytlar</h2>
-                <button class="btn btn-text btn-sm" @click="page = 'orders'">Hemmesi →</button>
+                <h2>Последние заказы</h2>
+                <button class="btn btn-text btn-sm" @click="page = 'orders'">Все →</button>
               </div>
-              <p v-if="!dash.recent.length" class="empty">Heniz sargyt ýok</p>
+              <p v-if="!dash.recent.length" class="empty">Заказов пока нет</p>
               <ul v-else class="recent">
                 <li v-for="o in dash.recent" :key="o.id">
                   <div>
@@ -603,8 +604,8 @@ onBeforeUnmount(() => {
             </section>
           </div>
           <p class="note">
-            Saýtda "Satyn al" basylanda sargyt şu ýere ýazylýar. Adam size Telegramda ýa-da Gmailde ýazandan soň
-            statusyny üýtgediň: <b>Gürleşildi</b> → <b>Tölendi</b>. Girdeji diňe "Tölendi" sargytlardan hasaplanýar.
+            Когда на сайте нажимают «Купить», заказ записывается сюда. После того как человек напишет вам в Telegram или Gmail,
+            меняйте статус: <b>На связи</b> → <b>Оплачен</b>. Выручка считается только по заказам со статусом «Оплачен».
           </p>
         </template>
 
@@ -612,53 +613,53 @@ onBeforeUnmount(() => {
         <template v-else-if="page === 'orders'">
           <div class="toolbar">
             <div class="chips">
-              <button :class="{ on: filter === 'all' }" @click="filter = 'all'">Hemmesi <b>{{ orders.length }}</b></button>
+              <button :class="{ on: filter === 'all' }" @click="filter = 'all'">Все <b>{{ orders.length }}</b></button>
               <button v-for="(s, k) in STATUS" :key="k" :class="{ on: filter === k }" @click="filter = k">
                 {{ s.label }} <b>{{ countBy(k) }}</b>
               </button>
             </div>
             <div class="toolbar-right">
-              <input v-model="query" class="search" type="search" placeholder="Gözle…" aria-label="Sargytlary gözle" />
-              <button class="btn btn-ghost btn-sm" @click="refreshOrders()">Täzele</button>
+              <input v-model="query" class="search" type="search" placeholder="Поиск…" aria-label="Поиск заказов" />
+              <button class="btn btn-ghost btn-sm" @click="refreshOrders()">Обновить</button>
             </div>
           </div>
 
           <div class="card table-wrap">
-            <p v-if="!filteredOrders.length" class="empty pad">Sargyt tapylmady</p>
+            <p v-if="!filteredOrders.length" class="empty pad">Заказы не найдены</p>
             <table v-else class="table">
               <thead>
                 <tr>
-                  <th>Wagt</th>
-                  <th>Tarif</th>
-                  <th>Kanal</th>
-                  <th>Dil</th>
-                  <th>Enjam</th>
-                  <th>Status</th>
-                  <th>Bellik</th>
+                  <th>Время</th>
+                  <th>Тариф</th>
+                  <th>Канал</th>
+                  <th>Язык</th>
+                  <th>Устройство</th>
+                  <th>Статус</th>
+                  <th>Заметка</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="o in filteredOrders" :key="o.id">
-                  <td data-l="Wagt" class="nowrap">{{ fmtDate(o.createdAt) }}</td>
-                  <td data-l="Tarif"><b>{{ planLabel(o.plan) }}</b></td>
-                  <td data-l="Kanal">
+                  <td data-l="Время" class="nowrap">{{ fmtDate(o.createdAt) }}</td>
+                  <td data-l="Тариф"><b>{{ planLabel(o.plan) }}</b></td>
+                  <td data-l="Канал">
                     <span class="chan"><i class="ch" :class="o.channel === 'gmail' ? 'gm' : 'tg'"></i>{{ o.channel === 'gmail' ? 'Gmail' : 'Telegram' }}</span>
                   </td>
-                  <td data-l="Dil"><span class="lang-tag">{{ o.lang === 'ru' ? 'RU' : 'TM' }}</span></td>
-                  <td data-l="Enjam" :title="o.ua">{{ device(o.ua) }}</td>
-                  <td data-l="Status">
+                  <td data-l="Язык"><span class="lang-tag">{{ o.lang === 'ru' ? 'RU' : 'TM' }}</span></td>
+                  <td data-l="Устройство" :title="o.ua">{{ device(o.ua) }}</td>
+                  <td data-l="Статус">
                     <select class="status-select" :class="STATUS[o.status].cls" :value="o.status"
-                      aria-label="Status" @change="updateOrder(o, { status: $event.target.value })">
+                      aria-label="Статус" @change="updateOrder(o, { status: $event.target.value })">
                       <option v-for="(s, k) in STATUS" :key="k" :value="k">{{ s.label }}</option>
                     </select>
                   </td>
-                  <td data-l="Bellik">
-                    <input class="note-input" :value="o.note" placeholder="Bellik goş…" aria-label="Bellik"
+                  <td data-l="Заметка">
+                    <input class="note-input" :value="o.note" placeholder="Добавить заметку…" aria-label="Заметка"
                       @change="updateOrder(o, { note: $event.target.value })" />
                   </td>
                   <td class="right">
-                    <button class="icon-btn danger" aria-label="Poz" title="Poz" @click="deleteOrder(o)">
+                    <button class="icon-btn danger" aria-label="Удалить" title="Удалить" @click="deleteOrder(o)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
                     </button>
                   </td>
@@ -703,17 +704,17 @@ onBeforeUnmount(() => {
                 </h2>
                 <p v-if="editor.list.desc" class="muted small">{{ editor.list.desc }}</p>
               </div>
-              <button class="btn btn-ghost btn-sm" @click="addItem(editor.list)">+ {{ editor.list.item }} goş</button>
+              <button class="btn btn-ghost btn-sm" @click="addItem(editor.list)">+ Добавить: {{ editor.list.item.toLowerCase() }}</button>
             </div>
-            <p v-if="!listOf(editor.list.path).length" class="empty">Sanaw boş</p>
+            <p v-if="!listOf(editor.list.path).length" class="empty">Список пуст</p>
             <div class="items">
               <div v-for="(it, i) in listOf(editor.list.path)" :key="i" class="item" :class="{ starred: it.best }">
                 <div class="item-head">
                   <span class="item-num">{{ editor.list.item }} {{ i + 1 }}</span>
                   <div class="item-actions">
-                    <button class="icon-btn" :disabled="i === 0" aria-label="Ýokary" title="Ýokary" @click="moveItem(editor.list, i, -1)">↑</button>
-                    <button class="icon-btn" :disabled="i === listOf(editor.list.path).length - 1" aria-label="Aşak" title="Aşak" @click="moveItem(editor.list, i, 1)">↓</button>
-                    <button class="icon-btn danger" aria-label="Poz" title="Poz" @click="removeItem(editor.list, i)">✕</button>
+                    <button class="icon-btn" :disabled="i === 0" aria-label="Выше" title="Выше" @click="moveItem(editor.list, i, -1)">↑</button>
+                    <button class="icon-btn" :disabled="i === listOf(editor.list.path).length - 1" aria-label="Ниже" title="Ниже" @click="moveItem(editor.list, i, 1)">↓</button>
+                    <button class="icon-btn danger" aria-label="Удалить" title="Удалить" @click="removeItem(editor.list, i)">✕</button>
                   </div>
                 </div>
                 <div class="form-grid">
@@ -750,18 +751,18 @@ onBeforeUnmount(() => {
           <section v-for="s in editor.strings || []" :key="s.path" class="card panel">
             <div class="panel-head">
               <h2>{{ s.title }} <span class="lang-tag">{{ editLang === 'tk' ? 'TM' : 'RU' }}</span></h2>
-              <button class="btn btn-ghost btn-sm" @click="addString(s)">+ Goş</button>
+              <button class="btn btn-ghost btn-sm" @click="addString(s)">+ Добавить</button>
             </div>
             <div class="strings">
               <div v-for="(v, i) in getAt(draft, fp(s.path))" :key="i" class="string-row">
                 <input v-model="getAt(draft, fp(s.path))[i]" :placeholder="s.placeholder" :aria-label="`${s.title} ${i + 1}`" />
-                <button class="icon-btn danger" aria-label="Poz" @click="removeString(s, i)">✕</button>
+                <button class="icon-btn danger" aria-label="Удалить" @click="removeString(s, i)">✕</button>
               </div>
             </div>
           </section>
 
           <div v-if="editor.reset" class="reset-row">
-            <button class="btn btn-text btn-sm" @click="resetSection(editor.reset)">Bu bölümi başlangyç ýagdaýyna gaýtar</button>
+            <button class="btn btn-text btn-sm" @click="resetSection(editor.reset)">Вернуть раздел к исходному состоянию</button>
           </div>
         </template>
       </div>

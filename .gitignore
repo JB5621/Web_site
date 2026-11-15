@@ -25,3 +25,9 @@ dist-ssr
 
 # Admin panel maglumatlary (sargytlar, mazmun)
 server/data
+
+# SSH açarlary
+SHA256:*
+
+# Serwer sazlamalary (parollar)
+.env

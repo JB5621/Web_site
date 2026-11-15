@@ -2,14 +2,14 @@
 // Serwer hem şu gurluşy ulanyp gelen maglumatlary barlaýar (sanitize).
 
 export const ICONS = {
-  bolt: { label: 'Ýyldyrym (tizlik)', d: 'M13 2 3 14h9l-1 8 10-12h-9l1-8z' },
-  shield: { label: 'Galkan (howpsuzlyk)', d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4' },
-  phone: { label: 'Telefon (enjamlar)', d: 'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 18h.01' },
-  chat: { label: 'Habar (goldaw)', d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
-  globe: { label: 'Dünýä', d: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20' },
-  lock: { label: 'Gulp', d: 'M7 11V7a5 5 0 0 1 10 0v4M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z' },
-  clock: { label: 'Sagat (24/7)', d: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2' },
-  star: { label: 'Ýyldyz', d: 'm12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z' },
+  bolt: { label: 'Молния (скорость)', d: 'M13 2 3 14h9l-1 8 10-12h-9l1-8z' },
+  shield: { label: 'Щит (безопасность)', d: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4' },
+  phone: { label: 'Телефон (устройства)', d: 'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 18h.01' },
+  chat: { label: 'Сообщение (поддержка)', d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' },
+  globe: { label: 'Глобус', d: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20' },
+  lock: { label: 'Замок', d: 'M7 11V7a5 5 0 0 1 10 0v4M5 11h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2z' },
+  clock: { label: 'Часы (24/7)', d: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2' },
+  star: { label: 'Звезда', d: 'm12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z' },
 }
 
 export const LANGS = ['tk', 'ru']
@@ -18,7 +18,7 @@ export const LANGS = ['tk', 'ru']
 // tk / ru: her diliň öz ýazgylary.
 export const defaultContent = {
   contact: {
-    telegram: 'qqq_sergo',
+    telegram: 'asvpntm',
     email: 'support.admin2000@gmail.com',
     // Goşmaça (boş bolsa saýtda görkezilmeýär)
     phone: '',

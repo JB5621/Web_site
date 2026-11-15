@@ -164,6 +164,29 @@ const copyText = async (text) => {
   setTimeout(() => (copied.value = ''), 2000)
 }
 
+// Saýt açylanda serwere habar berýär (eýesine Telegram bildirişi). Bir sessiýada 1 gezek.
+const logVisit = () => {
+  try {
+    if (sessionStorage.getItem('asvpn_visit')) return
+    sessionStorage.setItem('asvpn_visit', '1')
+  } catch {
+    /* private mode */
+  }
+  let ref = ''
+  try {
+    const u = document.referrer && new URL(document.referrer)
+    if (u && u.host !== location.host) ref = u.host
+  } catch {
+    /* ignore */
+  }
+  fetch('/api/visit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lang: lang.value, ref }),
+    keepalive: true,
+  }).catch(() => {})
+}
+
 const logOrder = (p, channel) => {
   try {
     fetch('/api/orders', {
@@ -352,6 +375,7 @@ const startParticles = () => {
 }
 
 onMounted(async () => {
+  logVisit()
   await loadContent()
   buildStats()
   await nextTick()
